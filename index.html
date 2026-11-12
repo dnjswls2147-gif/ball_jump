@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>볼 점프 (BALL JUMP)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      background-color: #11131a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #fff;
+    }
+
+    #game-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      max-height: 820px;
+      background: #1e2230;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD 상단 바 */
+    #hud {
+      position: absolute;
+      top: 16px;
+      left: 0;
+      width: 100%;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .coin-badge {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 16px;
+      color: #ffd43b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 212, 59, 0.3);
+    }
+
+    #score-display {
+      position: absolute;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 56px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.92);
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    #jump-dots {
+      position: absolute;
+      top: 125px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      transition: all 0.15s ease;
+    }
+
+    .dot.active {
+      background: #4dabf7;
+      box-shadow: 0 0 8px #4dabf7;
+      transform: scale(1.15);
+    }
+
+    /* 오버레이 화면 공통 */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 18, 28, 0.78);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 28px;
+      z-index: 10;
+      transition: opacity 0.2s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .title-logo {
+      font-size: 46px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-align: center;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ff922b, #ff6b6b, #fcc419);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 10px rgba(255, 107, 107, 0.35));
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #adb5bd;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .best-record {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px 22px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #e9ecef;
+      margin-bottom: 28px;
+    }
+
+    .btn {
+      width: 100%;
+      max-width: 240px;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s ease, filter 0.15s ease;
+      margin-bottom: 12px;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff6b6b, #ff922b);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* 상점 그리드 */
+    #shop-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 340px;
+      margin: 18px 0 24px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .skin-card {
+      background: rgba(255, 255, 255, 0.07);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .skin-card.equipped {
+      border-color: #51cf66;
+      background: rgba(81, 207, 102, 0.14);
+    }
+
+    .skin-preview {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .skin-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .skin-status {
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffd43b;
+    }
+
+    .skin-card.owned .skin-status {
+      color: #adb5bd;
+    }
+
+    .skin-card.equipped .skin-status {
+      color: #51cf66;
+    }
+
+    .gameover-stats {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0 28px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 14px 22px;
+      border-radius: 16px;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #adb5bd;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .sound-btn {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 상단 HUD -->
+    <div id="hud">
+      <div class="coin-badge">🪙 <span id="coin-count">0</span></div>
+      <button id="sound-toggle" class="sound-btn" title="소리 켜기/끄기">🔊</button>
+    </div>
+
+    <!-- 점수 및 3단 점프 인디케이터 -->
+    <div id="score-display" class="hidden">0</div>
+    <div id="jump-dots" class="hidden">
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+    </div>
+
+    <!-- 메인 시작 화면 -->
+    <div id="start-screen" class="overlay">
+      <div class="title-logo">BALL JUMP<br><span style="font-size: 24px;">볼 점프</span></div>
+      <p class="subtitle">터치 / 스페이스바로 3단 연속 점프!<br>벽면 가시와 톱날을 피해 높이 올라가세요</p>
+      <div class="best-record">🏆 최고 기록: <span id="start-best">0</span>m</div>
+      <button id="start-btn" class="btn btn-primary">게임 시작</button>
+      <button id="shop-btn" class="btn btn-secondary">🎨 스킨 상점</button>
+    </div>
+
+    <!-- 스킨 상점 화면 -->
+    <div id="shop-screen" class="overlay hidden">
+      <h2 style="font-size: 26px; font-weight: 900;">🎨 볼 스킨 상점</h2>
+      <p style="font-size: 13px; color: #adb5bd; margin-top: 4px;">코인을 모아 다양한 공을 잠금 해제하세요</p>
+      <div id="shop-grid"></div>
+      <button id="shop-back-btn" class="btn btn-secondary">돌아가기</button>
+    </div>
+
+    <!-- 게임 오버 화면 -->
+    <div id="gameover-screen" class="overlay hidden">
+      <h2 style="font-size: 34px; font-weight: 900; color: #ff6b6b;">GAME OVER</h2>
+      <div class="gameover-stats">
+        <div class="stat-box">
+          <div class="stat-label">이번 기록</div>
+          <div class="stat-value" id="final-score">0m</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">최고 기록</div>
+          <div class="stat-value" style="color: #fcc419;" id="final-best">0m</div>
+        </div>
+      </div>
+      <button id="restart-btn" class="btn btn-primary">다시 하기</button>
+      <button id="home-btn" class="btn btn-secondary">메인 메뉴</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. 게임 설정 및 스킨 데이터 (쉽게 커스텀 가능)
+    // ==========================================
+    const GAME_CONFIG = {
+      wallWidth: 26,
+      ballRadius: 15,
+      gravity: 0.46,
+      jumpForce: -10.2,
+      horizontalSpeed: 5.4,
+      maxJumps: 3, // 캣 점프 감성의 3단 연속 점프
+      spikeSize: 22
+    };
+
+    const SKINS = [
+      { id: 'classic', name: '클래식 오렌지', price: 0, color: '#ff922b', rim: '#fff4e6', icon: '' },
+      { id: 'cat', name: '냥이 볼', price: 30, color: '#f8f9fa', rim: '#ff8787', icon: '🐱' },
+      { id: 'basket', name: '농구공', price: 60, color: '#e8590c', rim: '#212529', icon: '🏀' },
+      { id: 'slime', name: '민트 슬라임', price: 100, color: '#20c997', rim: '#e6fcf5', icon: '💧' },
+      { id: 'neon', name: '사이버 네온', price: 150, color: '#7950f2', rim: '#00f5d4', icon: '⚡' },
+      { id: 'gold', name: '황금 마스터', price: 250, color: '#fcc419', rim: '#fff9db', icon: '👑' }
+    ];
+
+    // ==========================================
+    // 2. 저장 데이터 및 사운드 엔진 (Web Audio API)
+    // ==========================================
+    let saveData = JSON.parse(localStorage.getItem('ballJumpSave_v1')) || {
+      bestScore: 0,
+      coins: 0,
+      ownedSkins: ['classic'],
+      equippedSkin: 'classic'
+    };
+
+    function persistSave() {
+      localStorage.setItem('ballJumpSave_v1', JSON.stringify(saveData));
+      updateHUD();
+    }
+
+    let soundEnabled = true;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(640, now + 0.11);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'wall') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.06);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      } else if (type === 'coin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(980, now);
+        osc.frequency.setValueAtTime(1320, now + 0.06);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'gameover') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.linearRampToValueAtTime(75, now + 0.38);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    }
+
+    // ==========================================
+    // 3. 캔버스 및 게임 상태 변수
+    // ==========================================
+    const wrapper = document.getElementById('game-wrapper');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = 0;
+    let height = 0;
+
+    function resizeCanvas() {
+      width = wrapper.clientWidth;
+      height = wrapper.clientHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let gameState = 'MENU'; // MENU, PLAYING, GAMEOVER
+    let score = 0;
+    let maxAltitude = 0;
+    let cameraY = 0;
+    let highestGeneratedY = 0;
+    let shakeTime = 0;
+
+    const ball = {
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      jumpsLeft: GAME_CONFIG.maxJumps,
+      rotation: 0,
+      squashX: 1,
+      squashY: 1,
+      trail: []
+    };
+
+    let spikes = [];
+    let saws = [];
+    let coins = [];
+    let particles = [];
+
+    // ==========================================
+    // 4. UI 및 상점 관리
+    // ==========================================
+    const startScreen = document.getElementById('start-screen');
+    const shopScreen = document.getElementById('shop-screen');
+    const gameoverScreen = document.getElementById('gameover-screen');
+    const scoreDisplay = document.getElementById('score-display');
+    const jumpDots = document.getElementById('jump-dots');
+
+    function updateHUD() {
+      document.getElementById('coin-count').textContent = saveData.coins;
+      document.getElementById('start-best').textContent = saveData.bestScore;
+    }
+
+    function updateJumpDots() {
+      const dots = jumpDots.querySelectorAll('.dot');
+      dots.forEach((dot, idx) => {
+        if (idx < ball.jumpsLeft) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+    }
+
+    function renderShop() {
+      const grid = document.getElementById('shop-grid');
+      grid.innerHTML = '';
+      SKINS.forEach(skin => {
+        const owned = saveData.ownedSkins.includes(skin.id);
+        const equipped = saveData.equippedSkin === skin.id;
+
+        const card = document.createElement('div');
+        card.className = `skin-card ${owned ? 'owned' : ''} ${equipped ? 'equipped' : ''}`;
+        card.innerHTML = `
+          <div class="skin-preview" style="background:${skin.color}; border: 3px solid ${skin.rim};">
+            ${skin.icon}
+          </div>
+          <div class="skin-name">${skin.name}</div>
+          <div class="skin-status">
+            ${equipped ? '✔ 장착중' : owned ? '선택하기' : `🪙 ${skin.price}`}
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          if (owned) {
+            saveData.equippedSkin = skin.id;
+            playSound('jump');
+            persistSave();
+            renderShop();
+          } else if (saveData.coins >= skin.price) {
+            saveData.coins -= skin.price;
+            saveData.ownedSkins.push(skin.id);
+            saveData.equippedSkin = skin.id;
+            playSound('coin');
+            persistSave();
+            renderShop();
+          } else {
+            card.style.transform = 'translateX(4px)';
+            setTimeout(() => (card.style.transform = 'translateX(-4px)'), 60);
+            setTimeout(() => (card.style.transform = 'none'), 120);
+          }
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    // ==========================================
+    // 5. 장애물 및 코인 절차적 생성 로직
+    // ==========================================
+    function spawnParticles(x, y, color, count = 10) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 4.5;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          decay: 0.025 + Math.random() * 0.025,
+          size: 3 + Math.random() * 4,
+          color
+        });
+      }
+    }
+
+    function generateSegment(yPos) {
+      const difficulty = Math.min(score / 120, 1); // 0 ~ 1 난이도 상승
+
+      // 벽면 가시 생성 (좌측 또는 우측, 혹은 양쪽 번갈아)
+      const sideRoll = Math.random();
+      const clusterCount = score > 40 && Math.random() < 0.35 ? 2 : 1;
+
+      if (sideRoll < 0.45) {
+        for (let i = 0; i < clusterCount; i++) {
+          spikes.push({ side: 'left', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
+        }
+      } else if (sideRoll < 0.9) {
+        for (let i = 0; i < clusterCount; i++) {
+          spikes.push({ side: 'right', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
+        }
+      } else {
+        // 양쪽 벽에 높이를 살짝 어긋나게 배치
+        spikes.push({ side: 'left', y: yPos });
+        spikes.push({ side: 'right', y: yPos - 55 });
+      }
+
+      // 25m 이상부터 공중 이동 톱날 등장
+      if (score >= 25 && Math.random() < 0.25 + difficulty * 0.2) {
+        saws.push({
+          x: width / 2,
+          y: yPos - 75,
+          radius: 16,
+          vx: (Math.random() < 0.5 ? 1 : -1) * (1.8 + difficulty * 1.8),
+          angle: 0
+        });
+      }
+
+      // 코인 배치
+      if (Math.random() < 0.65) {
+        const coinX =
+          GAME_CONFIG.wallWidth +
+          45 +
+          Math.random() * (width - (GAME_CONFIG.wallWidth + 45) * 2);
+        coins.push({
+          x: coinX,
+          y: yPos - 45,
+          radius: 10,
+          collected: false,
+          bobOffset: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    // ==========================================
+    // 6. 게임 시작 및 점프 컨트롤
+    // ==========================================
+    function startGame() {
+      gameState = 'PLAYING';
+      score = 0;
+      maxAltitude = 0;
+      cameraY = 0;
+      shakeTime = 0;
+
+      ball.x = width / 2;
+      ball.y = height * 0.68;
+      ball.vx = GAME_CONFIG.horizontalSpeed;
+      ball.vy = GAME_CONFIG.jumpForce;
+      ball.jumpsLeft = GAME_CONFIG.maxJumps - 1;
+      ball.rotation = 0;
+      ball.squashX = 1;
+      ball.squashY = 1;
+      ball.trail = [];
+
+      spikes = [];
+      saws = [];
+      coins = [];
+      particles = [];
+
+      highestGeneratedY = height * 0.35;
+      for (let i = 0; i < 10; i++) {
+        generateSegment(highestGeneratedY);
+        highestGeneratedY -= 155;
+      }
+
+      startScreen.classList.add('hidden');
+      shopScreen.classList.add('hidden');
+      gameoverScreen.classList.add('hidden');
+      scoreDisplay.classList.remove('hidden');
+      jumpDots.classList.remove('hidden');
+      scoreDisplay.textContent = '0';
+      updateJumpDots();
+      playSound('jump');
+    }
+
+    function triggerJump() {
+      if (gameState !== 'PLAYING') return;
+      if (ball.jumpsLeft > 0) {
+        ball.vy = GAME_CONFIG.jumpForce;
+        ball.jumpsLeft--;
+        ball.squashX = 0.72;
+        ball.squashY = 1.32;
+        updateJumpDots();
+        playSound('jump');
+        spawnParticles(ball.x, ball.y + GAME_CONFIG.ballRadius, '#74c0fc', 7);
+      }
+    }
+
+    function triggerGameOver() {
+      if (gameState === 'GAMEOVER') return;
+      gameState = 'GAMEOVER';
+      shakeTime = 16;
+      playSound('gameover');
+
+      const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
+      spawnParticles(ball.x, ball.y, currentSkin.color, 26);
+
+      if (score > saveData.bestScore) {
+        saveData.bestScore = score;
+      }
+      persistSave();
+
+      setTimeout(() => {
+        scoreDisplay.classList.add('hidden');
+        jumpDots.classList.add('hidden');
+        document.getElementById('final-score').textContent = `${score}m`;
+        document.getElementById('final-best').textContent = `${saveData.bestScore}m`;
+        gameoverScreen.classList.remove('hidden');
+      }, 450);
+    }
+
+    // ==========================================
+    // 7. 메인 업데이트 & 렌더링 루프
+    // ==========================================
+    function getThemeColors() {
+      // 고도(점수)에 따라 캣 점프처럼 배경 분위기가 서서히 변화
+      if (score < 50) return { top: '#1e2749', bottom: '#273469', wall: '#30343f' };
+      if (score < 120) return { top: '#3c1642', bottom: '#086375', wall: '#1b263b' };
+      if (score < 220) return { top: '#4a1942', bottom: '#893168', wall: '#2e1f27' };
+      return { top: '#0b090a', bottom: '#370617', wall: '#161a1d' };
+    }
+
+    function update() {
+      // 파티클 업데이트
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      if (shakeTime > 0) shakeTime--;
+      if (gameState !== 'PLAYING') return;
+
+      // 공 물리 이동
+      ball.vy += GAME_CONFIG.gravity;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      ball.rotation += ball.vx * 0.045;
+
+      // 탄성 복원
+      ball.squashX += (1 - ball.squashX) * 0.18;
+      ball.squashY += (1 - ball.squashY) * 0.18;
+
+      // 잔상 궤적 기록
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 10) ball.trail.shift();
+
+      // 좌우 벽 충돌 및 3단 점프 충전
+      const leftBound = GAME_CONFIG.wallWidth + GAME_CONFIG.ballRadius;
+      const rightBound = width - GAME_CONFIG.wallWidth - GAME_CONFIG.ballRadius;
+
+      if (ball.x <= leftBound) {
+        ball.x = leftBound;
+        ball.vx = Math.abs(ball.vx);
+        ball.jumpsLeft = GAME_CONFIG.maxJumps;
+        ball.squashX = 0.68;
+        ball.squashY = 1.35;
+        updateJumpDots();
+        playSound('wall');
+        spawnParticles(GAME_CONFIG.wallWidth, ball.y, '#dee2e6', 5);
+      } else if (ball.x >= rightBound) {
+        ball.x = rightBound;
+        ball.vx = -Math.abs(ball.vx);
+        ball.jumpsLeft = GAME_CONFIG.maxJumps;
+        ball.squashX = 0.68;
+        ball.squashY = 1.35;
+        updateJumpDots();
+        playSound('wall');
+        spawnParticles(width - GAME_CONFIG.wallWidth, ball.y, '#dee2e6', 5);
+      }
+
+      // 카메라 상승 추적 (화면 상단 42% 지점 이상 올라갈 때만)
+      const targetCamY = ball.y - height * 0.42;
+      if (targetCamY < cameraY) {
+        cameraY = targetCamY;
+      }
+
+      // 고도 점수 계산
+      const startY = height * 0.68;
+      const currentAlt = Math.max(0, Math.floor((startY - ball.y) / 28));
+      if (currentAlt > score) {
+        score = currentAlt;
+        scoreDisplay.textContent = score;
+      }
+
+      // 새로운 구간 계속 생성
+      while (highestGeneratedY > cameraY - 300) {
+        generateSegment(highestGeneratedY);
+        const gap = Math.max(125, 160 - score * 0.15);
+        highestGeneratedY -= gap;
+      }
+
+      // 화면 아래로 추락 시 게임 오버
+      if (ball.y - cameraY > height + 30) {
+        triggerGameOver();
+        return;
+      }
+
+      // 벽면 가시 충돌 판정
+      for (let i = spikes.length - 1; i >= 0; i--) {
+        const sp = spikes[i];
+        if (sp.y - cameraY > height + 60) {
+          spikes.splice(i, 1);
+          continue;
+        }
+
+        const tipX =
+          sp.side === 'left'
+            ? GAME_CONFIG.wallWidth + GAME_CONFIG.spikeSize * 0.72
+            : width - GAME_CONFIG.wallWidth - GAME_CONFIG.spikeSize * 0.72;
+        const dx = ball.x - tipX;
+        const dy = ball.y - sp.y;
+        if (Math.hypot(dx, dy) < GAME_CONFIG.ballRadius + 5) {
+          triggerGameOver();
+          return;
+        }
+      }
+
+      // 공중 톱날 이동 및 충돌 판정
+      for (let i = saws.length - 1; i >= 0; i--) {
+        const saw = saws[i];
+        saw.x += saw.vx;
+        saw.angle += 0.14;
+
+        if (saw.x - saw.radius <= GAME_CONFIG.wallWidth || saw.x + saw.radius >= width - GAME_CONFIG.wallWidth) {
+          saw.vx *= -1;
+        }
+
+        if (saw.y - cameraY > height + 60) {
+          saws.splice(i, 1);
+          continue;
+        }
+
+        if (Math.hypot(ball.x - saw.x, ball.y - saw.y) < GAME_CONFIG.ballRadius + saw.radius - 3) {
+          triggerGameOver();
+          return;
+        }
+      }
+
+      // 코인 수집 판정
+      for (let i = coins.length - 1; i >= 0; i--) {
+        const c = coins[i];
+        c.bobOffset += 0.08;
+        if (c.y - cameraY > height + 60) {
+          coins.splice(i, 1);
+          continue;
+        }
+
+        if (!c.collected && Math.hypot(ball.x - c.x, ball.y - c.y) < GAME_CONFIG.ballRadius + c.radius + 4) {
+          c.collected = true;
+          saveData.coins += 1;
+          persistSave();
+          playSound('coin');
+          spawnParticles(c.x, c.y, '#ffd43b', 10);
+          coins.splice(i, 1);
+        }
+      }
+    }
+
+    function draw() {
+      ctx.save();
+      if (shakeTime > 0) {
+        const dx = (Math.random() - 0.5) * 10;
+        const dy = (Math.random() - 0.5) * 10;
+        ctx.translate(dx, dy);
+      }
+
+      // 배경 그라데이션
+      const theme = getThemeColors();
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, theme.top);
+      bgGrad.addColorStop(1, theme.bottom);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 배경 고도 눈금선 (속도감 연출)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      const gridSpacing = 100;
+      const offsetY = -(cameraY % gridSpacing);
+      for (let y = offsetY; y < height; y += gridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(GAME_CONFIG.wallWidth, y);
+        ctx.lineTo(width - GAME_CONFIG.wallWidth, y);
+        ctx.stroke();
+      }
+
+      // 카메라 변환 시작
+      ctx.save();
+      ctx.translate(0, -cameraY);
+
+      // 코인 그리기
+      coins.forEach(c => {
+        const bobY = c.y + Math.sin(c.bobOffset) * 4;
+        ctx.beginPath();
+        ctx.arc(c.x, bobY, c.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd43b';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#f08c00';
+        ctx.stroke();
+
+        ctx.fillStyle = '#f08c00';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('★', c.x, bobY + 0.5);
+      });
+
+      // 공중 톱날 그리기
+      saws.forEach(saw => {
+        ctx.save();
+        ctx.translate(saw.x, saw.y);
+        ctx.rotate(saw.angle);
+        ctx.fillStyle = '#ff6b6b';
+        const teeth = 8;
+        ctx.beginPath();
+        for (let i = 0; i < teeth * 2; i++) {
+          const r = i % 2 === 0 ? saw.radius + 4 : saw.radius - 4;
+          const a = (i * Math.PI) / teeth;
+          ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#212529';
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // 벽면 가시 그리기
+      spikes.forEach(sp => {
+        const s = GAME_CONFIG.spikeSize;
+        ctx.fillStyle = '#ff4d6d';
+        ctx.beginPath();
+        if (sp.side === 'left') {
+          ctx.moveTo(GAME_CONFIG.wallWidth, sp.y - s / 2);
+          ctx.lineTo(GAME_CONFIG.wallWidth + s, sp.y);
+          ctx.lineTo(GAME_CONFIG.wallWidth, sp.y + s / 2);
+        } else {
+          ctx.moveTo(width - GAME_CONFIG.wallWidth, sp.y - s / 2);
+          ctx.lineTo(width - GAME_CONFIG.wallWidth - s, sp.y);
+          ctx.lineTo(width - GAME_CONFIG.wallWidth, sp.y + s / 2);
+        }
+        ctx.closePath();
+        ctx.fill();
+      });
+
+      // 플레이어 공 그리기 (게임 오버 순간 제외)
+      if (gameState !== 'GAMEOVER') {
+        const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
+
+        // 잔상 궤적
+        ball.trail.forEach((pos, idx) => {
+          const ratio = (idx + 1) / ball.trail.length;
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, GAME_CONFIG.ballRadius * ratio * 0.75, 0, Math.PI * 2);
+          ctx.fillStyle = currentSkin.color;
+          ctx.globalAlpha = ratio * 0.28;
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        // 본체
+        ctx.save();
+        ctx.translate(ball.x, ball.y);
+        ctx.scale(ball.squashX, ball.squashY);
+        ctx.rotate(ball.rotation);
+
+        ctx.beginPath();
+        ctx.arc(0, 0, GAME_CONFIG.ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = currentSkin.color;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = currentSkin.rim;
+        ctx.stroke();
+
+        if (currentSkin.icon) {
+          ctx.font = '18px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(currentSkin.icon, 0, 1);
+        } else {
+          // 기본 하이라이트 눈동자 느낌
+          ctx.beginPath();
+          ctx.arc(-4, -4, 4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 파티클 그리기
+      particles.forEach(p => {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      ctx.restore(); // 카메라 변환 종료
+
+      // 좌우 고정 벽 기둥 그리기
+      ctx.fillStyle = theme.wall;
+      ctx.fillRect(0, 0, GAME_CONFIG.wallWidth, height);
+      ctx.fillRect(width - GAME_CONFIG.wallWidth, 0, GAME_CONFIG.wallWidth, height);
+
+      // 벽 안쪽 하이라이트 라인
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+      ctx.fillRect(GAME_CONFIG.wallWidth - 3, 0, 3, height);
+      ctx.fillRect(width - GAME_CONFIG.wallWidth, 0, 3, height);
+
+      ctx.restore();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // ==========================================
+    // 8. 이벤트 리스너 연결
+    // ==========================================
+    document.getElementById('start-btn').addEventListener('click', startGame);
+    document.getElementById('restart-btn').addEventListener('click', startGame);
+
+    document.getElementById('home-btn').addEventListener('click', () => {
+      gameState = 'MENU';
+      gameoverScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      updateHUD();
+    });
+
+    document.getElementById('shop-btn').addEventListener('click', () => {
+      startScreen.classList.add('hidden');
+      renderShop();
+      shopScreen.classList.remove('hidden');
+    });
+
+    document.getElementById('shop-back-btn').addEventListener('click', () => {
+      shopScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+    });
+
+    document.getElementById('sound-toggle').addEventListener('click', e => {
+      e.stopPropagation();
+      soundEnabled = !soundEnabled;
+      e.target.textContent = soundEnabled ? '🔊' : '🔇';
+    });
+
+    // 화면 터치/클릭 및 키보드 점프 입력
+    wrapper.addEventListener('pointerdown', e => {
+      if (e.target.closest('button') || e.target.closest('.overlay')) return;
+      triggerJump();
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+        e.preventDefault();
+        if (gameState === 'PLAYING') {
+          triggerJump();
+        } else if (gameState === 'MENU' && !startScreen.classList.contains('hidden')) {
+          startGame();
+        } else if (gameState === 'GAMEOVER' && !gameoverScreen.classList.contains('hidden')) {
+          startGame();
+        }
+      }
+    });
+
+    // 초기 실행
+    updateHUD();
+    loop();
+  </script>
+</body>
+  </html>
