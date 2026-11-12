@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>볼 점프 (BALL JUMP)</title>
+  <title>볼 점프 (BALL JUMP - Cat Jump Style)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -15,7 +15,7 @@
     }
 
     body {
-      background-color: #11131a;
+      background-color: #0b0d14;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -32,7 +32,7 @@
       height: 100vh;
       max-height: 820px;
       background: #1e2230;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
       overflow: hidden;
     }
 
@@ -45,10 +45,10 @@
     /* HUD 상단 바 */
     #hud {
       position: absolute;
-      top: 16px;
+      top: 14px;
       left: 0;
       width: 100%;
-      padding: 0 24px;
+      padding: 0 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -56,36 +56,57 @@
       z-index: 5;
     }
 
-    .coin-badge {
-      background: rgba(0, 0, 0, 0.45);
+    .badge-group {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .hud-badge {
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(6px);
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 6px 12px;
+      border-radius: 12px;
       font-weight: 800;
-      font-size: 16px;
+      font-size: 14px;
       color: #ffd43b;
       display: flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(255, 212, 59, 0.3);
+      gap: 5px;
+      border: 2px solid rgba(255, 212, 59, 0.4);
+    }
+
+    .sound-btn {
+      pointer-events: auto;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     #score-display {
       position: absolute;
-      top: 56px;
+      top: 52px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 56px;
+      font-size: 52px;
       font-weight: 900;
-      color: rgba(255, 255, 255, 0.92);
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       pointer-events: none;
       z-index: 4;
     }
 
     #jump-dots {
       position: absolute;
-      top: 125px;
+      top: 116px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -98,27 +119,26 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.3);
       transition: all 0.15s ease;
     }
 
     .dot.active {
       background: #4dabf7;
-      box-shadow: 0 0 8px #4dabf7;
-      transform: scale(1.15);
+      box-shadow: 0 0 10px #4dabf7;
+      transform: scale(1.2);
     }
 
     /* 오버레이 화면 공통 */
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(15, 18, 28, 0.78);
-      backdrop-filter: blur(8px);
+      background: linear-gradient(135deg, rgba(15, 18, 28, 0.92), rgba(26, 31, 48, 0.92));
+      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 28px;
+      justify-content: space-between;
+      padding: 24px 20px;
       z-index: 10;
       transition: opacity 0.2s ease;
     }
@@ -127,63 +147,164 @@
       display: none !important;
     }
 
+    /* 캣 점프 스타일 로비 상단 */
+    .lobby-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .top-icon-btn {
+      background: #2b3044;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .top-icon-btn:active { transform: scale(0.92); }
+
+    .lobby-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin: 10px 0;
+    }
+
     .title-logo {
-      font-size: 46px;
+      font-size: 42px;
       font-weight: 900;
       letter-spacing: -1px;
-      text-align: center;
-      line-height: 1.05;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #ff922b, #ff6b6b, #fcc419);
+      line-height: 1.1;
+      background: linear-gradient(180deg, #fff 20%, #ffd43b 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 4px 10px rgba(255, 107, 107, 0.35));
+      filter: drop-shadow(0 4px 12px rgba(255, 193, 7, 0.4));
+      margin-bottom: 6px;
     }
 
-    .subtitle {
-      font-size: 14px;
-      color: #adb5bd;
-      margin-bottom: 32px;
-      text-align: center;
-    }
-
-    .best-record {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 10px 22px;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #e9ecef;
-      margin-bottom: 28px;
-    }
-
-    .btn {
-      width: 100%;
-      max-width: 240px;
-      padding: 16px 24px;
-      border: none;
-      border-radius: 16px;
-      font-size: 18px;
+    .subtitle-badge {
+      background: rgba(255, 107, 107, 0.2);
+      border: 1px solid #ff6b6b;
+      color: #ff8787;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
       font-weight: 800;
+    }
+
+    /* 캣 점프 스타일 캐릭터 전시 박스 */
+    .character-showcase {
+      background: rgba(0, 0, 0, 0.35);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      width: 100%;
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .char-preview-ball {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      margin-bottom: 10px;
+      animation: floatBall 2s ease-in-out infinite;
+    }
+
+    @keyframes floatBall {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .char-name-tag {
+      font-size: 15px;
+      font-weight: 800;
+      color: #e9ecef;
+    }
+
+    /* 캣 점프 스타일 하단 메뉴 바 버튼들 */
+    .lobby-menu-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .menu-card {
+      background: #2b3044;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       cursor: pointer;
-      transition: transform 0.1s ease, filter 0.15s ease;
-      margin-bottom: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .menu-card:active { transform: scale(0.94); }
+    .menu-card span { font-size: 22px; margin-bottom: 4px; }
+    .menu-card label { font-size: 13px; font-weight: 800; color: #ced4da; cursor: pointer; }
+
+    /* 빅 스타트 핑크 🐾 버튼 (캣 점프 메인 시작 버튼) */
+    .big-start-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #ff6b6b, #ff8787);
+      border: 3px solid #ffa8a8;
+      border-radius: 24px;
+      padding: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(255, 107, 107, 0.5);
+      transition: transform 0.1s;
+    }
+    .big-start-btn:active { transform: scale(0.96); }
+    .big-start-btn span { font-size: 26px; }
+    .big-start-btn b { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+
+    /* 상점 및 랭킹 모달 창 공통 */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 18, 28, 0.9);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      z-index: 20;
     }
 
-    .btn:active {
-      transform: scale(0.95);
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #ff6b6b, #ff922b);
-      color: #fff;
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+    .modal-title {
+      font-size: 22px;
+      font-weight: 900;
     }
 
     /* 상점 그리드 */
@@ -192,16 +313,14 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       width: 100%;
-      max-width: 340px;
-      margin: 18px 0 24px;
-      max-height: 360px;
+      flex: 1;
       overflow-y: auto;
-      padding: 4px;
+      padding-bottom: 16px;
     }
 
     .skin-card {
-      background: rgba(255, 255, 255, 0.07);
-      border: 2px solid transparent;
+      background: #2b3044;
+      border: 2px solid rgba(255,255,255,0.1);
       border-radius: 16px;
       padding: 14px 10px;
       display: flex;
@@ -213,80 +332,106 @@
 
     .skin-card.equipped {
       border-color: #51cf66;
-      background: rgba(81, 207, 102, 0.14);
+      background: rgba(81, 207, 102, 0.15);
     }
 
     .skin-preview {
-      width: 38px;
-      height: 38px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       margin-bottom: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 18px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      font-size: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .skin-name {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
+    .skin-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .skin-status { font-size: 12px; font-weight: 800; color: #ffd43b; }
+    .skin-card.owned .skin-status { color: #adb5bd; }
+    .skin-card.equipped .skin-status { color: #51cf66; }
+
+    /* 랭킹 보드 리스트 스타일 */
+    #ranking-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 16px;
     }
 
-    .skin-status {
-      font-size: 12px;
-      font-weight: 700;
-      color: #ffd43b;
+    .rank-item {
+      background: #2b3044;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .skin-card.owned .skin-status {
-      color: #adb5bd;
-    }
+    .rank-item.top-1 { border-color: #fcc419; background: rgba(252, 196, 25, 0.12); }
+    .rank-item.top-2 { border-color: #adb5bd; background: rgba(173, 181, 189, 0.12); }
+    .rank-item.top-3 { border-color: #ff922b; background: rgba(255, 146, 43, 0.12); }
 
-    .skin-card.equipped .skin-status {
-      color: #51cf66;
+    .rank-info { display: flex; align-items: center; gap: 12px; }
+    .rank-num { font-size: 16px; font-weight: 900; width: 24px; color: #adb5bd; }
+    .rank-item.top-1 .rank-num { color: #fcc419; }
+    .rank-item.top-2 .rank-num { color: #adb5bd; }
+    .rank-item.top-3 .rank-num { color: #ff922b; }
+
+    .rank-name { font-size: 15px; font-weight: 800; color: #fff; }
+    .rank-score { font-size: 18px; font-weight: 900; color: #4dabf7; }
+
+    /* 게임오버 화면 */
+    .gameover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 18, 28, 0.92);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 28px;
+      z-index: 15;
     }
 
     .gameover-stats {
       display: flex;
       gap: 16px;
-      margin: 16px 0 28px;
+      margin: 20px 0 32px;
     }
 
     .stat-box {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 14px 22px;
-      border-radius: 16px;
+      background: #2b3044;
+      border: 2px solid rgba(255,255,255,0.1);
+      padding: 16px 24px;
+      border-radius: 18px;
       text-align: center;
-      min-width: 110px;
+      min-width: 120px;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: #adb5bd;
-      margin-bottom: 4px;
-    }
+    .stat-label { font-size: 12px; color: #adb5bd; margin-bottom: 4px; font-weight: 700; }
+    .stat-value { font-size: 28px; font-weight: 900; color: #fff; }
 
-    .stat-value {
-      font-size: 26px;
-      font-weight: 900;
-    }
-
-    .sound-btn {
-      pointer-events: auto;
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 16px;
+    .btn {
+      width: 100%;
+      max-width: 260px;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 800;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      transition: transform 0.1s ease;
+      margin-bottom: 12px;
     }
+    .btn:active { transform: scale(0.95); }
+    .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff922b); color: #fff; box-shadow: 0 8px 20px rgba(255,107,107,0.4); }
+    .btn-secondary { background: #2b3044; color: #fff; border: 2px solid rgba(255,255,255,0.15); }
   </style>
 </head>
 <body>
@@ -295,8 +440,10 @@
 
     <!-- 상단 HUD -->
     <div id="hud">
-      <div class="coin-badge">🪙 <span id="coin-count">0</span></div>
-      <button id="sound-toggle" class="sound-btn" title="소리 켜기/끄기">🔊</button>
+      <div class="badge-group">
+        <div class="hud-badge">🪙 <span id="coin-count">0</span></div>
+      </div>
+      <button id="sound-toggle" class="sound-btn" title="사운드">🔊</button>
     </div>
 
     <!-- 점수 및 3단 점프 인디케이터 -->
@@ -307,44 +454,94 @@
       <div class="dot active"></div>
     </div>
 
-    <!-- 메인 시작 화면 -->
+    <!-- 캣 점프 스타일 메인 로비 화면 -->
     <div id="start-screen" class="overlay">
-      <div class="title-logo">BALL JUMP<br><span style="font-size: 24px;">볼 점프</span></div>
-      <p class="subtitle">터치 / 스페이스바로 3단 연속 점프!<br>벽면 가시와 톱날을 피해 높이 올라가세요</p>
-      <div class="best-record">🏆 최고 기록: <span id="start-best">0</span>m</div>
-      <button id="start-btn" class="btn btn-primary">게임 시작</button>
-      <button id="shop-btn" class="btn btn-secondary">🎨 스킨 상점</button>
+      <div class="lobby-header">
+        <button class="top-icon-btn" id="lobby-ranking-btn" title="랭킹보드">🏆</button>
+        <div style="font-size: 13px; font-weight: 800; color: #adb5bd;">BALL JUMP v2.0</div>
+        <button class="top-icon-btn" id="lobby-sound-btn" title="설정">⚙️</button>
+      </div>
+
+      <div class="lobby-center">
+        <div class="title-logo">BALL JUMP</div>
+        <div class="subtitle-badge">🐱 캣 점프 스타일 아케이드</div>
+      </div>
+
+      <!-- 캐릭터 전시 박스 -->
+      <div class="character-showcase">
+        <div id="lobby-ball-preview" class="char-preview-ball" style="background:#ff922b; border:3px solid #fff4e6;">🐱</div>
+        <div id="lobby-ball-name" class="char-name-tag">클래식 오렌지</div>
+      </div>
+
+      <!-- 하단 메뉴 바 및 시작 버튼 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+        <div class="lobby-menu-grid">
+          <div class="menu-card" id="open-shop-btn">
+            <span>🎨</span>
+            <label>스킨상점</label>
+          </div>
+          <div class="menu-card" id="open-ranking-btn">
+            <span>🌍</span>
+            <label>랭킹보드</label>
+          </div>
+          <div class="menu-card" id="nickname-change-btn">
+            <span>✏️</span>
+            <label>닉네임</label>
+          </div>
+        </div>
+
+        <button id="start-btn" class="big-start-btn">
+          <span>🐾</span>
+          <b>게임 시작</b>
+        </button>
+      </div>
     </div>
 
-    <!-- 스킨 상점 화면 -->
-    <div id="shop-screen" class="overlay hidden">
-      <h2 style="font-size: 26px; font-weight: 900;">🎨 볼 스킨 상점</h2>
-      <p style="font-size: 13px; color: #adb5bd; margin-top: 4px;">코인을 모아 다양한 공을 잠금 해제하세요</p>
+    <!-- 스킨 상점 모달 -->
+    <div id="shop-screen" class="modal-overlay hidden">
+      <div class="modal-header">
+        <div class="modal-title">🎨 볼 스킨 상점</div>
+        <button class="top-icon-btn" id="shop-back-btn">✕</button>
+      </div>
       <div id="shop-grid"></div>
-      <button id="shop-back-btn" class="btn btn-secondary">돌아가기</button>
+    </div>
+
+    <!-- 랭킹 보드 모달 (전 세계 공용 실시간) -->
+    <div id="ranking-screen" class="modal-overlay hidden">
+      <div class="modal-header">
+        <div class="modal-title">🏆 실시간 랭킹 보드</div>
+        <button class="top-icon-btn" id="ranking-back-btn">✕</button>
+      </div>
+      <div style="font-size: 12px; color: #adb5bd; margin-bottom: 10px; text-align: center;">모든 플레이어와 공유되는 최고 기록입니다!</div>
+      <div id="ranking-list">
+        <div style="text-align: center; color: #adb5bd; margin-top: 40px;">랭킹 불러오는 중...</div>
+      </div>
     </div>
 
     <!-- 게임 오버 화면 -->
-    <div id="gameover-screen" class="overlay hidden">
-      <h2 style="font-size: 34px; font-weight: 900; color: #ff6b6b;">GAME OVER</h2>
+    <div id="gameover-screen" class="gameover-overlay hidden">
+      <h2 style="font-size: 36px; font-weight: 900; color: #ff6b6b; margin-bottom: 4px;">GAME OVER</h2>
+      <p style="font-size: 13px; color: #adb5bd;" id="rank-submit-status">랭킹 등록 완료!</p>
+      
       <div class="gameover-stats">
         <div class="stat-box">
           <div class="stat-label">이번 기록</div>
           <div class="stat-value" id="final-score">0m</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">최고 기록</div>
+          <div class="stat-label">개인 최고</div>
           <div class="stat-value" style="color: #fcc419;" id="final-best">0m</div>
         </div>
       </div>
+
       <button id="restart-btn" class="btn btn-primary">다시 하기</button>
-      <button id="home-btn" class="btn btn-secondary">메인 메뉴</button>
+      <button id="home-btn" class="btn btn-secondary">메인 로비</button>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // 1. 게임 설정 및 스킨 데이터 (쉽게 커스텀 가능)
+    // 1. 게임 설정 및 스킨 데이터
     // ==========================================
     const GAME_CONFIG = {
       wallWidth: 26,
@@ -352,12 +549,12 @@
       gravity: 0.46,
       jumpForce: -10.2,
       horizontalSpeed: 5.4,
-      maxJumps: 3, // 캣 점프 감성의 3단 연속 점프
+      maxJumps: 3, // 3단 연속 점프
       spikeSize: 22
     };
 
     const SKINS = [
-      { id: 'classic', name: '클래식 오렌지', price: 0, color: '#ff922b', rim: '#fff4e6', icon: '' },
+      { id: 'classic', name: '클래식 오렌지', price: 0, color: '#ff922b', rim: '#fff4e6', icon: '⚽' },
       { id: 'cat', name: '냥이 볼', price: 30, color: '#f8f9fa', rim: '#ff8787', icon: '🐱' },
       { id: 'basket', name: '농구공', price: 60, color: '#e8590c', rim: '#212529', icon: '🏀' },
       { id: 'slime', name: '민트 슬라임', price: 100, color: '#20c997', rim: '#e6fcf5', icon: '💧' },
@@ -366,20 +563,31 @@
     ];
 
     // ==========================================
-    // 2. 저장 데이터 및 사운드 엔진 (Web Audio API)
+    // 2. 저장 데이터 및 닉네임 관리
     // ==========================================
-    let saveData = JSON.parse(localStorage.getItem('ballJumpSave_v1')) || {
+    let saveData = JSON.parse(localStorage.getItem('ballJumpSave_v2')) || {
       bestScore: 0,
       coins: 0,
       ownedSkins: ['classic'],
-      equippedSkin: 'classic'
+      equippedSkin: 'classic',
+      nickname: '점프왕' + Math.floor(Math.random() * 900 + 100)
     };
 
     function persistSave() {
-      localStorage.setItem('ballJumpSave_v1', JSON.stringify(saveData));
+      localStorage.setItem('ballJumpSave_v2', JSON.stringify(saveData));
       updateHUD();
+      updateLobbySkinDisplay();
     }
 
+    // 닉네임 설정 초기화 확인
+    if (!saveData.nickname) {
+      saveData.nickname = '점프왕' + Math.floor(Math.random() * 900 + 100);
+      persistSave();
+    }
+
+    // ==========================================
+    // 3. 캣 점프 고품질 효과음 엔진 (Web Audio API)
+    // ==========================================
     let soundEnabled = true;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
@@ -396,42 +604,116 @@
       const now = audioCtx.currentTime;
 
       if (type === 'jump') {
+        // 통통 튀는 경쾌한 점프음
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(640, now + 0.11);
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.frequency.setValueAtTime(340, now);
+        osc.frequency.exponentialRampToValueAtTime(720, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.13);
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.13);
       } else if (type === 'wall') {
+        // 벽 튕김 타격음
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(190, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.06);
-        gain.gain.setValueAtTime(0.14, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now);
-        osc.stop(now + 0.06);
+        osc.stop(now + 0.08);
       } else if (type === 'coin') {
+        // 반짝이는 코인 수집음
         osc.type = 'sine';
         osc.frequency.setValueAtTime(980, now);
-        osc.frequency.setValueAtTime(1320, now + 0.06);
-        gain.gain.setValueAtTime(0.16, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.frequency.setValueAtTime(1400, now + 0.07);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
-        osc.stop(now + 0.18);
+        osc.stop(now + 0.2);
       } else if (type === 'gameover') {
+        // 게임 오버 묵직한 사운드
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(240, now);
-        osc.frequency.linearRampToValueAtTime(75, now + 0.38);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.linearRampToValueAtTime(65, now + 0.4);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.42);
         osc.start(now);
-        osc.stop(now + 0.4);
+        osc.stop(now + 0.42);
       }
     }
 
     // ==========================================
-    // 3. 캔버스 및 게임 상태 변수
+    // 4. 공용 랭킹 서버 시스템 (MockAPI 연동)
+    // ==========================================
+    const LEADERBOARD_API = 'https://65c19d45dc74300ea10db79f.mockapi.io/api/v1/scores'; // 공용 리더보드 엔드포인트
+
+    async function fetchLeaderboard() {
+      const listEl = document.getElementById('ranking-list');
+      listEl.innerHTML = '<div style="text-align: center; color: #adb5bd; margin-top: 40px;">랭킹 불러오는 중...</div>';
+      try {
+        const res = await fetch(LEADERBOARD_API);
+        const data = await res.json();
+        // 점수 높은 순 정렬 후 상위 20명 추출
+        data.sort((a, b) => b.score - a.score);
+        
+        listEl.innerHTML = '';
+        if (data.length === 0) {
+          listEl.innerHTML = '<div style="text-align: center; color: #adb5bd; margin-top: 40px;">아직 등록된 랭킹이 없습니다. 첫 기록을 세워보세요!</div>';
+          return;
+        }
+
+        data.slice(0, 20).forEach((item, index) => {
+          const rank = index + 1;
+          const topClass = rank === 1 ? 'top-1' : rank === 2 ? 'top-2' : rank === 3 ? 'top-3' : '';
+          const medal = rank === 1 ? '🥇 ' : rank === 2 ? '🥈 ' : rank === 3 ? '🥉 ' : '';
+          
+          const div = document.createElement('div');
+          div.className = `rank-item ${topClass}`;
+          div.innerHTML = `
+            <div class="rank-info">
+              <div class="rank-num">${medal || rank}</div>
+              <div class="rank-name">${escapeHtml(item.name || '익명')}</div>
+            </div>
+            <div class="rank-score">${item.score}m</div>
+          `;
+          listEl.appendChild(div);
+        });
+      } catch (err) {
+        // 네트워크 오류 시 로컬 저장 기록으로 대체 표시
+        listEl.innerHTML = `
+          <div class="rank-item top-1">
+            <div class="rank-info">
+              <div class="rank-num">🥇</div>
+              <div class="rank-name">${escapeHtml(saveData.nickname)} (내 기록)</div>
+            </div>
+            <div class="rank-score">${saveData.bestScore}m</div>
+          </div>
+          <div style="text-align: center; color: #adb5bd; font-size: 12px; margin-top: 15px;">서버 연결 원활하지 않음 (로컬 표시)</div>
+        `;
+      }
+    }
+
+    async function submitScoreToCloud(scoreVal) {
+      if (scoreVal <= 0) return;
+      document.getElementById('rank-submit-status').textContent = '실시간 랭킹 등록 중...';
+      try {
+        await fetch(LEADERBOARD_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: saveData.nickname, score: scoreVal, date: new Date().toISOString() })
+        });
+        document.getElementById('rank-submit-status').textContent = '전 세계 랭킹 등록 완료! 🏆';
+      } catch (e) {
+        document.getElementById('rank-submit-status').textContent = '로컬 최고 기록 저장 완료!';
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+
+    // ==========================================
+    // 5. 캔버스 및 게임 루프 관리
     // ==========================================
     const wrapper = document.getElementById('game-wrapper');
     const canvas = document.getElementById('gameCanvas');
@@ -449,23 +731,16 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    let gameState = 'MENU'; // MENU, PLAYING, GAMEOVER
+    let gameState = 'MENU';
     let score = 0;
-    let maxAltitude = 0;
     let cameraY = 0;
     let highestGeneratedY = 0;
     let shakeTime = 0;
 
     const ball = {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
+      x: 0, y: 0, vx: 0, vy: 0,
       jumpsLeft: GAME_CONFIG.maxJumps,
-      rotation: 0,
-      squashX: 1,
-      squashY: 1,
-      trail: []
+      rotation: 0, squashX: 1, squashY: 1, trail: []
     };
 
     let spikes = [];
@@ -473,22 +748,18 @@
     let coins = [];
     let particles = [];
 
-    // ==========================================
-    // 4. UI 및 상점 관리
-    // ==========================================
-    const startScreen = document.getElementById('start-screen');
-    const shopScreen = document.getElementById('shop-screen');
-    const gameoverScreen = document.getElementById('gameover-screen');
-    const scoreDisplay = document.getElementById('score-display');
-    const jumpDots = document.getElementById('jump-dots');
-
-    function updateHUD() {
+    function updateLobbySkinDisplay() {
       document.getElementById('coin-count').textContent = saveData.coins;
-      document.getElementById('start-best').textContent = saveData.bestScore;
+      const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
+      const preview = document.getElementById('lobby-ball-preview');
+      preview.style.background = currentSkin.color;
+      preview.style.borderColor = currentSkin.rim;
+      preview.textContent = currentSkin.icon;
+      document.getElementById('lobby-ball-name').textContent = currentSkin.name;
     }
 
     function updateJumpDots() {
-      const dots = jumpDots.querySelectorAll('.dot');
+      const dots = document.querySelectorAll('#jump-dots .dot');
       dots.forEach((dot, idx) => {
         if (idx < ball.jumpsLeft) dot.classList.add('active');
         else dot.classList.remove('active');
@@ -529,90 +800,56 @@
             renderShop();
           } else {
             card.style.transform = 'translateX(4px)';
-            setTimeout(() => (card.style.transform = 'translateX(-4px)'), 60);
-            setTimeout(() => (card.style.transform = 'none'), 120);
+            setTimeout(() => card.style.transform = 'translateX(-4px)', 60);
+            setTimeout(() => card.style.transform = 'none', 120);
           }
         });
-
         grid.appendChild(card);
       });
     }
 
-    // ==========================================
-    // 5. 장애물 및 코인 절차적 생성 로직
-    // ==========================================
     function spawnParticles(x, y, color, count = 10) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 1.5 + Math.random() * 4.5;
         particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life: 1,
-          decay: 0.025 + Math.random() * 0.025,
-          size: 3 + Math.random() * 4,
-          color
+          x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          life: 1, decay: 0.025 + Math.random() * 0.025,
+          size: 3 + Math.random() * 4, color
         });
       }
     }
 
     function generateSegment(yPos) {
-      const difficulty = Math.min(score / 120, 1); // 0 ~ 1 난이도 상승
-
-      // 벽면 가시 생성 (좌측 또는 우측, 혹은 양쪽 번갈아)
+      const difficulty = Math.min(score / 120, 1);
       const sideRoll = Math.random();
       const clusterCount = score > 40 && Math.random() < 0.35 ? 2 : 1;
 
       if (sideRoll < 0.45) {
-        for (let i = 0; i < clusterCount; i++) {
-          spikes.push({ side: 'left', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
-        }
+        for (let i = 0; i < clusterCount; i++) spikes.push({ side: 'left', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
       } else if (sideRoll < 0.9) {
-        for (let i = 0; i < clusterCount; i++) {
-          spikes.push({ side: 'right', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
-        }
+        for (let i = 0; i < clusterCount; i++) spikes.push({ side: 'right', y: yPos - i * (GAME_CONFIG.spikeSize + 2) });
       } else {
-        // 양쪽 벽에 높이를 살짝 어긋나게 배치
         spikes.push({ side: 'left', y: yPos });
         spikes.push({ side: 'right', y: yPos - 55 });
       }
 
-      // 25m 이상부터 공중 이동 톱날 등장
       if (score >= 25 && Math.random() < 0.25 + difficulty * 0.2) {
         saws.push({
-          x: width / 2,
-          y: yPos - 75,
-          radius: 16,
-          vx: (Math.random() < 0.5 ? 1 : -1) * (1.8 + difficulty * 1.8),
-          angle: 0
+          x: width / 2, y: yPos - 75, radius: 16,
+          vx: (Math.random() < 0.5 ? 1 : -1) * (1.8 + difficulty * 1.8), angle: 0
         });
       }
 
-      // 코인 배치
       if (Math.random() < 0.65) {
-        const coinX =
-          GAME_CONFIG.wallWidth +
-          45 +
-          Math.random() * (width - (GAME_CONFIG.wallWidth + 45) * 2);
-        coins.push({
-          x: coinX,
-          y: yPos - 45,
-          radius: 10,
-          collected: false,
-          bobOffset: Math.random() * Math.PI * 2
-        });
+        const coinX = GAME_CONFIG.wallWidth + 45 + Math.random() * (width - (GAME_CONFIG.wallWidth + 45) * 2);
+        coins.push({ x: coinX, y: yPos - 45, radius: 10, collected: false, bobOffset: Math.random() * Math.PI * 2 });
       }
     }
 
-    // ==========================================
-    // 6. 게임 시작 및 점프 컨트롤
-    // ==========================================
     function startGame() {
       gameState = 'PLAYING';
       score = 0;
-      maxAltitude = 0;
       cameraY = 0;
       shakeTime = 0;
 
@@ -637,12 +874,13 @@
         highestGeneratedY -= 155;
       }
 
-      startScreen.classList.add('hidden');
-      shopScreen.classList.add('hidden');
-      gameoverScreen.classList.add('hidden');
-      scoreDisplay.classList.remove('hidden');
-      jumpDots.classList.remove('hidden');
-      scoreDisplay.textContent = '0';
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('shop-screen').classList.add('hidden');
+      document.getElementById('ranking-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('score-display').classList.remove('hidden');
+      document.getElementById('jump-dots').classList.remove('hidden');
+      document.getElementById('score-display').textContent = '0';
       updateJumpDots();
       playSound('jump');
     }
@@ -673,21 +911,18 @@
         saveData.bestScore = score;
       }
       persistSave();
+      submitScoreToCloud(score);
 
       setTimeout(() => {
-        scoreDisplay.classList.add('hidden');
-        jumpDots.classList.add('hidden');
+        document.getElementById('score-display').classList.add('hidden');
+        document.getElementById('jump-dots').classList.add('hidden');
         document.getElementById('final-score').textContent = `${score}m`;
         document.getElementById('final-best').textContent = `${saveData.bestScore}m`;
-        gameoverScreen.classList.remove('hidden');
+        document.getElementById('gameover-screen').classList.remove('hidden');
       }, 450);
     }
 
-    // ==========================================
-    // 7. 메인 업데이트 & 렌더링 루프
-    // ==========================================
     function getThemeColors() {
-      // 고도(점수)에 따라 캣 점프처럼 배경 분위기가 서서히 변화
       if (score < 50) return { top: '#1e2749', bottom: '#273469', wall: '#30343f' };
       if (score < 120) return { top: '#3c1642', bottom: '#086375', wall: '#1b263b' };
       if (score < 220) return { top: '#4a1942', bottom: '#893168', wall: '#2e1f27' };
@@ -695,11 +930,9 @@
     }
 
     function update() {
-      // 파티클 업데이트
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
+        p.x += p.vx; p.y += p.vy;
         p.life -= p.decay;
         if (p.life <= 0) particles.splice(i, 1);
       }
@@ -707,21 +940,17 @@
       if (shakeTime > 0) shakeTime--;
       if (gameState !== 'PLAYING') return;
 
-      // 공 물리 이동
       ball.vy += GAME_CONFIG.gravity;
       ball.x += ball.vx;
       ball.y += ball.vy;
       ball.rotation += ball.vx * 0.045;
 
-      // 탄성 복원
       ball.squashX += (1 - ball.squashX) * 0.18;
       ball.squashY += (1 - ball.squashY) * 0.18;
 
-      // 잔상 궤적 기록
       ball.trail.push({ x: ball.x, y: ball.y });
       if (ball.trail.length > 10) ball.trail.shift();
 
-      // 좌우 벽 충돌 및 3단 점프 충전
       const leftBound = GAME_CONFIG.wallWidth + GAME_CONFIG.ballRadius;
       const rightBound = width - GAME_CONFIG.wallWidth - GAME_CONFIG.ballRadius;
 
@@ -729,8 +958,7 @@
         ball.x = leftBound;
         ball.vx = Math.abs(ball.vx);
         ball.jumpsLeft = GAME_CONFIG.maxJumps;
-        ball.squashX = 0.68;
-        ball.squashY = 1.35;
+        ball.squashX = 0.68; ball.squashY = 1.35;
         updateJumpDots();
         playSound('wall');
         spawnParticles(GAME_CONFIG.wallWidth, ball.y, '#dee2e6', 5);
@@ -738,90 +966,56 @@
         ball.x = rightBound;
         ball.vx = -Math.abs(ball.vx);
         ball.jumpsLeft = GAME_CONFIG.maxJumps;
-        ball.squashX = 0.68;
-        ball.squashY = 1.35;
+        ball.squashX = 0.68; ball.squashY = 1.35;
         updateJumpDots();
         playSound('wall');
         spawnParticles(width - GAME_CONFIG.wallWidth, ball.y, '#dee2e6', 5);
       }
 
-      // 카메라 상승 추적 (화면 상단 42% 지점 이상 올라갈 때만)
       const targetCamY = ball.y - height * 0.42;
-      if (targetCamY < cameraY) {
-        cameraY = targetCamY;
-      }
+      if (targetCamY < cameraY) cameraY = targetCamY;
 
-      // 고도 점수 계산
       const startY = height * 0.68;
       const currentAlt = Math.max(0, Math.floor((startY - ball.y) / 28));
       if (currentAlt > score) {
         score = currentAlt;
-        scoreDisplay.textContent = score;
+        document.getElementById('score-display').textContent = score;
       }
 
-      // 새로운 구간 계속 생성
       while (highestGeneratedY > cameraY - 300) {
         generateSegment(highestGeneratedY);
         const gap = Math.max(125, 160 - score * 0.15);
         highestGeneratedY -= gap;
       }
 
-      // 화면 아래로 추락 시 게임 오버
       if (ball.y - cameraY > height + 30) {
         triggerGameOver();
         return;
       }
 
-      // 벽면 가시 충돌 판정
       for (let i = spikes.length - 1; i >= 0; i--) {
         const sp = spikes[i];
-        if (sp.y - cameraY > height + 60) {
-          spikes.splice(i, 1);
-          continue;
-        }
-
-        const tipX =
-          sp.side === 'left'
-            ? GAME_CONFIG.wallWidth + GAME_CONFIG.spikeSize * 0.72
-            : width - GAME_CONFIG.wallWidth - GAME_CONFIG.spikeSize * 0.72;
-        const dx = ball.x - tipX;
-        const dy = ball.y - sp.y;
-        if (Math.hypot(dx, dy) < GAME_CONFIG.ballRadius + 5) {
-          triggerGameOver();
-          return;
+        if (sp.y - cameraY > height + 60) { spikes.splice(i, 1); continue; }
+        const tipX = sp.side === 'left' ? GAME_CONFIG.wallWidth + GAME_CONFIG.spikeSize * 0.72 : width - GAME_CONFIG.wallWidth - GAME_CONFIG.spikeSize * 0.72;
+        if (Math.hypot(ball.x - tipX, ball.y - sp.y) < GAME_CONFIG.ballRadius + 5) {
+          triggerGameOver(); return;
         }
       }
 
-      // 공중 톱날 이동 및 충돌 판정
       for (let i = saws.length - 1; i >= 0; i--) {
         const saw = saws[i];
-        saw.x += saw.vx;
-        saw.angle += 0.14;
-
-        if (saw.x - saw.radius <= GAME_CONFIG.wallWidth || saw.x + saw.radius >= width - GAME_CONFIG.wallWidth) {
-          saw.vx *= -1;
-        }
-
-        if (saw.y - cameraY > height + 60) {
-          saws.splice(i, 1);
-          continue;
-        }
-
+        saw.x += saw.vx; saw.angle += 0.14;
+        if (saw.x - saw.radius <= GAME_CONFIG.wallWidth || saw.x + saw.radius >= width - GAME_CONFIG.wallWidth) saw.vx *= -1;
+        if (saw.y - cameraY > height + 60) { saws.splice(i, 1); continue; }
         if (Math.hypot(ball.x - saw.x, ball.y - saw.y) < GAME_CONFIG.ballRadius + saw.radius - 3) {
-          triggerGameOver();
-          return;
+          triggerGameOver(); return;
         }
       }
 
-      // 코인 수집 판정
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
         c.bobOffset += 0.08;
-        if (c.y - cameraY > height + 60) {
-          coins.splice(i, 1);
-          continue;
-        }
-
+        if (c.y - cameraY > height + 60) { coins.splice(i, 1); continue; }
         if (!c.collected && Math.hypot(ball.x - c.x, ball.y - c.y) < GAME_CONFIG.ballRadius + c.radius + 4) {
           c.collected = true;
           saveData.coins += 1;
@@ -836,12 +1030,9 @@
     function draw() {
       ctx.save();
       if (shakeTime > 0) {
-        const dx = (Math.random() - 0.5) * 10;
-        const dy = (Math.random() - 0.5) * 10;
-        ctx.translate(dx, dy);
+        ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
       }
 
-      // 배경 그라데이션
       const theme = getThemeColors();
       const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
       bgGrad.addColorStop(0, theme.top);
@@ -849,64 +1040,32 @@
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 배경 고도 눈금선 (속도감 연출)
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.lineWidth = 1;
-      const gridSpacing = 100;
-      const offsetY = -(cameraY % gridSpacing);
-      for (let y = offsetY; y < height; y += gridSpacing) {
-        ctx.beginPath();
-        ctx.moveTo(GAME_CONFIG.wallWidth, y);
-        ctx.lineTo(width - GAME_CONFIG.wallWidth, y);
-        ctx.stroke();
-      }
-
-      // 카메라 변환 시작
       ctx.save();
       ctx.translate(0, -cameraY);
 
-      // 코인 그리기
       coins.forEach(c => {
         const bobY = c.y + Math.sin(c.bobOffset) * 4;
         ctx.beginPath();
         ctx.arc(c.x, bobY, c.radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffd43b';
-        ctx.fill();
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#f08c00';
-        ctx.stroke();
-
-        ctx.fillStyle = '#f08c00';
-        ctx.font = 'bold 11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('★', c.x, bobY + 0.5);
+        ctx.fillStyle = '#ffd43b'; ctx.fill();
+        ctx.lineWidth = 2.5; ctx.strokeStyle = '#f08c00'; ctx.stroke();
       });
 
-      // 공중 톱날 그리기
       saws.forEach(saw => {
         ctx.save();
         ctx.translate(saw.x, saw.y);
         ctx.rotate(saw.angle);
         ctx.fillStyle = '#ff6b6b';
-        const teeth = 8;
         ctx.beginPath();
-        for (let i = 0; i < teeth * 2; i++) {
+        for (let i = 0; i < 16; i++) {
           const r = i % 2 === 0 ? saw.radius + 4 : saw.radius - 4;
-          const a = (i * Math.PI) / teeth;
+          const a = (i * Math.PI) / 8;
           ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
         }
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 6, 0, Math.PI * 2);
-        ctx.fillStyle = '#212529';
-        ctx.fill();
+        ctx.closePath(); ctx.fill();
         ctx.restore();
       });
 
-      // 벽면 가시 그리기
       spikes.forEach(sp => {
         const s = GAME_CONFIG.spikeSize;
         ctx.fillStyle = '#ff4d6d';
@@ -920,15 +1079,11 @@
           ctx.lineTo(width - GAME_CONFIG.wallWidth - s, sp.y);
           ctx.lineTo(width - GAME_CONFIG.wallWidth, sp.y + s / 2);
         }
-        ctx.closePath();
-        ctx.fill();
+        ctx.closePath(); ctx.fill();
       });
 
-      // 플레이어 공 그리기 (게임 오버 순간 제외)
       if (gameState !== 'GAMEOVER') {
         const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
-
-        // 잔상 궤적
         ball.trail.forEach((pos, idx) => {
           const ratio = (idx + 1) / ball.trail.length;
           ctx.beginPath();
@@ -939,57 +1094,32 @@
         });
         ctx.globalAlpha = 1;
 
-        // 본체
         ctx.save();
         ctx.translate(ball.x, ball.y);
         ctx.scale(ball.squashX, ball.squashY);
         ctx.rotate(ball.rotation);
-
         ctx.beginPath();
         ctx.arc(0, 0, GAME_CONFIG.ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = currentSkin.color;
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = currentSkin.rim;
-        ctx.stroke();
+        ctx.fillStyle = currentSkin.color; ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = currentSkin.rim; ctx.stroke();
 
-        if (currentSkin.icon) {
-          ctx.font = '18px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(currentSkin.icon, 0, 1);
-        } else {
-          // 기본 하이라이트 눈동자 느낌
-          ctx.beginPath();
-          ctx.arc(-4, -4, 4, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-          ctx.fill();
-        }
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(currentSkin.icon, 0, 1);
         ctx.restore();
       }
 
-      // 파티클 그리기
       particles.forEach(p => {
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
       });
       ctx.globalAlpha = 1;
+      ctx.restore();
 
-      ctx.restore(); // 카메라 변환 종료
-
-      // 좌우 고정 벽 기둥 그리기
       ctx.fillStyle = theme.wall;
       ctx.fillRect(0, 0, GAME_CONFIG.wallWidth, height);
       ctx.fillRect(width - GAME_CONFIG.wallWidth, 0, GAME_CONFIG.wallWidth, height);
-
-      // 벽 안쪽 하이라이트 라인
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
-      ctx.fillRect(GAME_CONFIG.wallWidth - 3, 0, 3, height);
-      ctx.fillRect(width - GAME_CONFIG.wallWidth, 0, 3, height);
-
       ctx.restore();
     }
 
@@ -1000,27 +1130,45 @@
     }
 
     // ==========================================
-    // 8. 이벤트 리스너 연결
+    // 6. 이벤트 및 UI 연결
     // ==========================================
     document.getElementById('start-btn').addEventListener('click', startGame);
     document.getElementById('restart-btn').addEventListener('click', startGame);
 
     document.getElementById('home-btn').addEventListener('click', () => {
       gameState = 'MENU';
-      gameoverScreen.classList.add('hidden');
-      startScreen.classList.remove('hidden');
-      updateHUD();
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+      updateLobbySkinDisplay();
     });
 
-    document.getElementById('shop-btn').addEventListener('click', () => {
-      startScreen.classList.add('hidden');
+    document.getElementById('open-shop-btn').addEventListener('click', () => {
       renderShop();
-      shopScreen.classList.remove('hidden');
+      document.getElementById('shop-screen').classList.remove('hidden');
+    });
+    document.getElementById('shop-back-btn').addEventListener('click', () => {
+      document.getElementById('shop-screen').classList.add('hidden');
     });
 
-    document.getElementById('shop-back-btn').addEventListener('click', () => {
-      shopScreen.classList.add('hidden');
-      startScreen.classList.remove('hidden');
+    document.getElementById('open-ranking-btn').addEventListener('click', () => {
+      document.getElementById('ranking-screen').classList.remove('hidden');
+      fetchLeaderboard();
+    });
+    document.getElementById('lobby-ranking-btn').addEventListener('click', () => {
+      document.getElementById('ranking-screen').classList.remove('hidden');
+      fetchLeaderboard();
+    });
+    document.getElementById('ranking-back-btn').addEventListener('click', () => {
+      document.getElementById('ranking-screen').classList.add('hidden');
+    });
+
+    document.getElementById('nickname-change-btn').addEventListener('click', () => {
+      const newName = prompt('사용할 닉네임을 입력하세요:', saveData.nickname);
+      if (newName && newName.trim()) {
+        saveData.nickname = newName.trim().substring(0, 10);
+        persistSave();
+        alert(`닉네임이 "${saveData.nickname}"(으)로 변경되었습니다!`);
+      }
     });
 
     document.getElementById('sound-toggle').addEventListener('click', e => {
@@ -1028,29 +1176,27 @@
       soundEnabled = !soundEnabled;
       e.target.textContent = soundEnabled ? '🔊' : '🔇';
     });
+    document.getElementById('lobby-sound-btn').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      alert(`효과음이 ${soundEnabled ? '켜졌습니다.' : '꺼졌습니다.'}`);
+    });
 
-    // 화면 터치/클릭 및 키보드 점프 입력
     wrapper.addEventListener('pointerdown', e => {
-      if (e.target.closest('button') || e.target.closest('.overlay')) return;
+      if (e.target.closest('button') || e.target.closest('.modal-overlay') || e.target.closest('.gameover-overlay')) return;
       triggerJump();
     });
 
     window.addEventListener('keydown', e => {
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         e.preventDefault();
-        if (gameState === 'PLAYING') {
-          triggerJump();
-        } else if (gameState === 'MENU' && !startScreen.classList.contains('hidden')) {
-          startGame();
-        } else if (gameState === 'GAMEOVER' && !gameoverScreen.classList.contains('hidden')) {
-          startGame();
-        }
+        if (gameState === 'PLAYING') triggerJump();
+        else if (gameState === 'MENU' && document.getElementById('start-screen').classList.contains('hidden') === false) startGame();
+        else if (gameState === 'GAMEOVER') startGame();
       }
     });
 
-    // 초기 실행
-    updateHUD();
+    updateLobbySkinDisplay();
     loop();
   </script>
 </body>
-  </html>
+</html>
