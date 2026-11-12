@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>볼 점프 (BALL JUMP)</title>
+  <title>볼 점프 (BALL JUMP TOWER)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -86,32 +86,48 @@
       align-items: center;
     }
 
-    /* 숫자 위 네모 칸 점수판 */
+    /* 숫자 위 네모 칸 점수판 및 체력(시간) 게이지 */
     #score-box {
       position: absolute;
-      top: 54px;
+      top: 52px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(15, 18, 28, 0.78);
+      background: rgba(15, 18, 28, 0.85);
       border: 3px solid #ffd43b;
-      border-radius: 14px;
-      padding: 6px 24px;
-      min-width: 110px;
+      border-radius: 16px;
+      padding: 8px 20px;
+      min-width: 130px;
       text-align: center;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
       pointer-events: none;
       z-index: 4;
     }
 
     #score-display {
-      font-size: 36px;
+      font-size: 34px;
       font-weight: 900;
       color: #ffffff;
       line-height: 1.1;
       letter-spacing: 1px;
     }
 
-    /* 하단 좌/우 컨트롤 버튼 (왼쪽 빨간색 / 오른쪽 파란색) */
+    #health-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    #health-bar-fill {
+      width: 100%;
+      height: 100%;
+      background: #51cf66;
+      transition: width 0.1s linear, background-color 0.3s;
+    }
+
+    /* 하단 좌/우 컨트롤 버튼 */
     #controls-bar {
       position: absolute;
       bottom: 24px;
@@ -204,9 +220,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
-    .top-icon-btn:active {
-      transform: scale(0.92);
-    }
+    .top-icon-btn:active { transform: scale(0.92); }
 
     .lobby-center {
       display: flex;
@@ -269,11 +283,7 @@
       50% { transform: translateY(-8px); }
     }
 
-    .char-name-tag {
-      font-size: 15px;
-      font-weight: 800;
-      color: #e9ecef;
-    }
+    .char-name-tag { font-size: 15px; font-weight: 800; color: #e9ecef; }
 
     .lobby-menu-grid {
       display: grid;
@@ -293,22 +303,9 @@
       cursor: pointer;
       box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
     }
-
-    .menu-card:active {
-      transform: scale(0.94);
-    }
-
-    .menu-card span {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
-    .menu-card label {
-      font-size: 13px;
-      font-weight: 800;
-      color: #ced4da;
-      cursor: pointer;
-    }
+    .menu-card:active { transform: scale(0.94); }
+    .menu-card span { font-size: 22px; margin-bottom: 4px; }
+    .menu-card label { font-size: 13px; font-weight: 800; color: #ced4da; cursor: pointer; }
 
     .big-start-btn {
       width: 100%;
@@ -323,23 +320,11 @@
       cursor: pointer;
       box-shadow: 0 10px 25px rgba(255, 107, 107, 0.5);
     }
+    .big-start-btn:active { transform: scale(0.96); }
+    .big-start-btn span { font-size: 26px; }
+    .big-start-btn b { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 1px; }
 
-    .big-start-btn:active {
-      transform: scale(0.96);
-    }
-
-    .big-start-btn span {
-      font-size: 26px;
-    }
-
-    .big-start-btn b {
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: 1px;
-    }
-
-    /* 모달 (상점 / 랭킹보드) */
+    /* 모달 공통 */
     .modal-overlay {
       position: absolute;
       inset: 0;
@@ -358,10 +343,7 @@
       margin-bottom: 14px;
     }
 
-    .modal-title {
-      font-size: 22px;
-      font-weight: 900;
-    }
+    .modal-title { font-size: 22px; font-weight: 900; }
 
     #shop-grid {
       display: grid;
@@ -384,10 +366,7 @@
       cursor: pointer;
     }
 
-    .skin-card.equipped {
-      border-color: #51cf66;
-      background: rgba(81, 207, 102, 0.15);
-    }
+    .skin-card.equipped { border-color: #51cf66; background: rgba(81, 207, 102, 0.15); }
 
     .skin-preview {
       width: 44px;
@@ -400,25 +379,10 @@
       font-size: 20px;
     }
 
-    .skin-name {
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .skin-status {
-      font-size: 12px;
-      font-weight: 800;
-      color: #ffd43b;
-    }
-
-    .skin-card.owned .skin-status {
-      color: #adb5bd;
-    }
-
-    .skin-card.equipped .skin-status {
-      color: #51cf66;
-    }
+    .skin-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .skin-status { font-size: 12px; font-weight: 800; color: #ffd43b; }
+    .skin-card.owned .skin-status { color: #adb5bd; }
+    .skin-card.equipped .skin-status { color: #51cf66; }
 
     #ranking-list {
       flex: 1;
@@ -439,47 +403,16 @@
       justify-content: space-between;
     }
 
-    .rank-item.top-1 {
-      border-color: #fcc419;
-      background: rgba(252, 196, 25, 0.14);
-    }
+    .rank-item.top-1 { border-color: #fcc419; background: rgba(252, 196, 25, 0.14); }
+    .rank-item.top-2 { border-color: #adb5bd; background: rgba(173, 181, 189, 0.14); }
+    .rank-item.top-3 { border-color: #ff922b; background: rgba(255, 146, 43, 0.14); }
 
-    .rank-item.top-2 {
-      border-color: #adb5bd;
-      background: rgba(173, 181, 189, 0.14);
-    }
+    .rank-info { display: flex; align-items: center; gap: 12px; }
+    .rank-num { font-size: 16px; font-weight: 900; width: 26px; color: #adb5bd; }
+    .rank-name { font-size: 15px; font-weight: 800; color: #fff; }
+    .rank-score { font-size: 18px; font-weight: 900; color: #4dabf7; }
 
-    .rank-item.top-3 {
-      border-color: #ff922b;
-      background: rgba(255, 146, 43, 0.14);
-    }
-
-    .rank-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .rank-num {
-      font-size: 16px;
-      font-weight: 900;
-      width: 26px;
-      color: #adb5bd;
-    }
-
-    .rank-name {
-      font-size: 15px;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    .rank-score {
-      font-size: 18px;
-      font-weight: 900;
-      color: #4dabf7;
-    }
-
-    /* 게임오버 화면 */
+    /* 게임오버 화면 (로비로 가기 + 다시 시작하기) */
     .gameover-overlay {
       position: absolute;
       inset: 0;
@@ -508,18 +441,8 @@
       min-width: 120px;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: #adb5bd;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
-    .stat-value {
-      font-size: 28px;
-      font-weight: 900;
-      color: #fff;
-    }
+    .stat-label { font-size: 12px; color: #adb5bd; margin-bottom: 4px; font-weight: 700; }
+    .stat-value { font-size: 28px; font-weight: 900; color: #fff; }
 
     .btn {
       width: 100%;
@@ -532,22 +455,9 @@
       cursor: pointer;
       margin-bottom: 12px;
     }
-
-    .btn:active {
-      transform: scale(0.95);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ff6b6b, #ff922b);
-      color: #fff;
-      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
-    }
-
-    .btn-secondary {
-      background: #2b3044;
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, 0.15);
-    }
+    .btn:active { transform: scale(0.95); }
+    .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff922b); color: #fff; box-shadow: 0 8px 20px rgba(255,107,107,0.4); }
+    .btn-secondary { background: #2b3044; color: #fff; border: 2px solid rgba(255,255,255,0.15); }
   </style>
 </head>
 <body>
@@ -560,9 +470,12 @@
       <button id="sound-toggle" class="sound-btn" title="사운드 및 배경음악">🔊</button>
     </div>
 
-    <!-- 숫자 위 네모 칸 점수판 (3점프 인디케이터 삭제 완료) -->
+    <!-- 숫자 위 네모 칸 점수판 + 10초 체력 게이지 바 -->
     <div id="score-box" class="hidden">
       <div id="score-display">0</div>
+      <div id="health-bar-container">
+        <div id="health-bar-fill"></div>
+      </div>
     </div>
 
     <!-- 하단 좌(빨강) / 우(파랑) 점프 조작 버튼 -->
@@ -628,14 +541,14 @@
       <div id="shop-grid"></div>
     </div>
 
-    <!-- 실시간 공용 랭킹 보드 모달 -->
+    <!-- 모두가 똑같이 보는 공용 실시간 랭킹 보드 모달 -->
     <div id="ranking-screen" class="modal-overlay hidden">
       <div class="modal-header">
         <div class="modal-title">🏆 실시간 랭킹 보드</div>
         <button class="top-icon-btn" id="ranking-back-btn">✕</button>
       </div>
       <div style="font-size: 12px; color: #51cf66; margin-bottom: 10px; text-align: center; font-weight: 700;">
-        접속 및 플레이 시 모두가 같은 실시간 순위를 공유합니다!
+        전 세계 모든 플레이어가 동일하게 공유하는 실시간 랭킹입니다[span_0](start_span)[span_0](end_span)!
       </div>
       <div id="ranking-list"></div>
     </div>
@@ -663,7 +576,7 @@
 
   <script>
     // ==========================================
-    // 1. 게임 설정 및 스킨 데이터
+    // 1. 게임 설정 및 스킨 데이터 (스킨별 특색 효과음 포함)
     // ==========================================
     const GAME_CONFIG = {
       wallMargin: 12,
@@ -671,22 +584,23 @@
       gravity: 0.44,
       jumpForce: -10.8,
       moveSpeed: 5.2,
-      platformHeight: 16
+      platformHeight: 15,
+      maxHealthTime: 10.0 // 체력 바 유지 시간 (10초)
     };
 
     const SKINS = [
-      { id: 'classic', name: '클래식 오렌지', price: 0, color: '#ff922b', rim: '#fff4e6', icon: '⚽' },
-      { id: 'cat', name: '냥이 볼', price: 30, color: '#f8f9fa', rim: '#ff8787', icon: '🐱' },
-      { id: 'basket', name: '농구공', price: 60, color: '#e8590c', rim: '#212529', icon: '🏀' },
-      { id: 'slime', name: '민트 슬라임', price: 100, color: '#20c997', rim: '#e6fcf5', icon: '💧' },
-      { id: 'neon', name: '사이버 네온', price: 150, color: '#7950f2', rim: '#00f5d4', icon: '⚡' },
-      { id: 'gold', name: '황금 마스터', price: 250, color: '#fcc419', rim: '#fff9db', icon: '👑' }
+      { id: 'classic', name: '클래식 오렌지', price: 0, color: '#ff922b', rim: '#fff4e6', icon: '⚽', soundPitch: 1.0 },
+      { id: 'cat', name: '냥이 볼', price: 30, color: '#f8f9fa', rim: '#ff8787', icon: '🐱', soundPitch: 1.25 }, // 고양이 특색 고음
+      { id: 'basket', name: '농구공', price: 60, color: '#e8590c', rim: '#212529', icon: '🏀', soundPitch: 0.8 }, // 묵직한 중저음
+      { id: 'slime', name: '민트 슬라임', price: 100, color: '#20c997', rim: '#e6fcf5', icon: '💧', soundPitch: 1.5 }, // 물방울 고음
+      { id: 'neon', name: '사이버 네온', price: 150, color: '#7950f2', rim: '#00f5d4', icon: '⚡', soundPitch: 1.35 }, // 네온 일렉톤
+      { id: 'gold', name: '황금 마스터', price: 250, color: '#fcc419', rim: '#fff9db', icon: '👑', soundPitch: 1.1 } // 황금 영롱함
     ];
 
     // ==========================================
-    // 2. 로컬 저장소 및 플레이어 고유 ID
+    // 2. 로컬 저장소 (나갔다 들어와도 유지)
     // ==========================================
-    let saveData = JSON.parse(localStorage.getItem('ballJumpTower_v3')) || {
+    let saveData = JSON.parse(localStorage.getItem('ballJumpTower_v4')) || {
       playerId: 'player_' + Math.random().toString(36).substring(2, 10),
       bestScore: 0,
       coins: 0,
@@ -700,12 +614,12 @@
     }
 
     function persistSave() {
-      localStorage.setItem('ballJumpTower_v3', JSON.stringify(saveData));
+      localStorage.setItem('ballJumpTower_v4', JSON.stringify(saveData));
       updateLobbyDisplay();
     }
 
     // ==========================================
-    // 3. 캣 점프 감성 배경음악(BGM) + 효과음 엔진
+    // 3. 사운드 및 스킨별 특색 효과음 엔진
     // ==========================================
     let soundEnabled = true;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -713,12 +627,9 @@
     let bgmInterval = null;
     let bgmStep = 0;
 
-    // 캣 점프 스타일의 밝고 경쾌한 칩튠 멜로디 (음계 주파수)
     const BGM_NOTES = [
       523.25, 0, 659.25, 783.99, 659.25, 0, 523.25, 587.33,
-      659.25, 783.99, 880.00, 783.99, 659.25, 587.33, 523.25, 0,
-      587.33, 0, 739.99, 880.00, 783.99, 659.25, 587.33, 659.25,
-      783.99, 880.00, 1046.50, 880.00, 783.99, 659.25, 523.25, 0
+      659.25, 783.99, 880.00, 783.99, 659.25, 587.33, 523.25, 0
     ];
 
     function ensureAudio() {
@@ -739,7 +650,7 @@
           const gain = audioCtx.createGain();
           osc.type = 'square';
           osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.035, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -760,6 +671,9 @@
       if (!soundEnabled) return;
       ensureAudio();
 
+      const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
+      const pitch = currentSkin.soundPitch || 1.0;
+
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
@@ -768,16 +682,16 @@
 
       if (type === 'jump') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(360, now);
-        osc.frequency.exponentialRampToValueAtTime(760, now + 0.11);
+        osc.frequency.setValueAtTime(340 * pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(740 * pitch, now + 0.11);
         gain.gain.setValueAtTime(0.18, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
         osc.start(now);
         osc.stop(now + 0.12);
       } else if (type === 'land') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(240, now);
-        osc.frequency.exponentialRampToValueAtTime(420, now + 0.06);
+        osc.frequency.setValueAtTime(220 * pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(400 * pitch, now + 0.06);
         gain.gain.setValueAtTime(0.14, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
         osc.start(now);
@@ -793,18 +707,26 @@
       } else if (type === 'gameover') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(260, now);
-        osc.frequency.linearRampToValueAtTime(60, now + 0.42);
+        osc.frequency.linearRampToValueAtTime(55, now + 0.42);
         gain.gain.setValueAtTime(0.2, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.44);
         osc.start(now);
         osc.stop(now + 0.44);
+      } else if (type === 'click') {
+        // 버튼 누를 때마다 나는 클릭 효과음
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.04);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
       }
     }
 
     // ==========================================
-    // 4. 모두가 같은 순위를 보는 공용 실시간 랭킹 보드
+    // 4. 모두가 똑같이 보는 공용 실시간 랭킹 보드 서버
     // ==========================================
-    // 전 세계 모든 클라이언트가 동일하게 읽고 쓸 수 있는 공용 KV/JSON 저장소
     const SHARED_RANK_URL = 'https://kvdb.io/A5k9mP2xQ8vL3nR7wY4zT1/balljump_global_ranks';
 
     async function syncAndLoadLeaderboard(autoRegister = true) {
@@ -821,10 +743,9 @@
           if (Array.isArray(parsed)) board = parsed;
         }
       } catch (e) {
-        console.warn('랭킹 불러오기 재시도 대기:', e);
+        console.warn('랭킹 서버 동기화 대기 중');
       }
 
-      // 들어오자마자 내 닉네임과 최고 기록이 즉시 랭킹보드에 등록/갱신되도록 처리
       if (autoRegister) {
         const existingIdx = board.findIndex(item => item.id === saveData.playerId);
         if (existingIdx >= 0) {
@@ -840,7 +761,6 @@
           });
         }
 
-        // 점수 내림차순 정렬 후 상위 50명 유지
         board.sort((a, b) => b.score - a.score);
         board = board.slice(0, 50);
 
@@ -850,9 +770,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(board)
           });
-        } catch (e) {
-          console.warn('랭킹 저장 실패:', e);
-        }
+        } catch (e) {}
       }
 
       renderRankingList(board);
@@ -893,7 +811,7 @@
     }
 
     // ==========================================
-    // 5. 캔버스 및 타워 물리 변수
+    // 5. 캔버스 및 게임 변수
     // ==========================================
     const wrapper = document.getElementById('game-wrapper');
     const canvas = document.getElementById('gameCanvas');
@@ -919,15 +837,13 @@
     let shakeTime = 0;
     let lastTime = 0;
 
+    // 체력 및 1초 쿨타임 점프 변수
+    let healthTimeLeft = GAME_CONFIG.maxHealthTime;
+    let lastJumpTime = 0;
+
     const ball = {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      rotation: 0,
-      squashX: 1,
-      squashY: 1,
-      trail: []
+      x: 0, y: 0, vx: 0, vy: 0,
+      rotation: 0, squashX: 1, squashY: 1, trail: []
     };
 
     let platforms = [];
@@ -965,22 +881,21 @@
         `;
 
         card.addEventListener('click', () => {
+          playSound('click');
           if (owned) {
             saveData.equippedSkin = skin.id;
-            playSound('jump');
             persistSave();
             renderShop();
           } else if (saveData.coins >= skin.price) {
             saveData.coins -= skin.price;
             saveData.ownedSkins.push(skin.id);
             saveData.equippedSkin = skin.id;
-            playSound('coin');
             persistSave();
             renderShop();
           } else {
             card.style.transform = 'translateX(4px)';
-            setTimeout(() => (card.style.transform = 'translateX(-4px)'), 60);
-            setTimeout(() => (card.style.transform = 'none'), 120);
+            setTimeout(() => card.style.transform = 'translateX(-4px)', 60);
+            setTimeout(() => card.style.transform = 'none', 120);
           }
         });
         grid.appendChild(card);
@@ -1005,25 +920,25 @@
     }
 
     // ==========================================
-    // 6. 층별 네모난 가로 벽(발판) 랜덤 생성
+    // 6. 층별 블록 생성 (블록 작게, 많게, 갈수록 적게/좁게)
     // ==========================================
     function generateNextFloor() {
       floorCount++;
-      const stepY = 92; // 층간 높이
+      const stepY = 88;
       highestPlatformY -= stepY;
 
-      // 초반에는 발판이 넓고, 올라갈수록 서서히 랜덤하게 좁아짐
-      const minW = Math.max(68, 115 - Math.floor(floorCount * 0.4));
-      const maxW = Math.max(95, 165 - Math.floor(floorCount * 0.4));
+      // 갈수록 블록 폭이 점점 짧아지도록 설계
+      const minW = Math.max(48, 92 - Math.floor(floorCount * 0.6));
+      const maxW = Math.max(70, 130 - Math.floor(floorCount * 0.6));
       const platW = minW + Math.random() * (maxW - minW);
 
-      const minX = GAME_CONFIG.wallMargin + 8;
-      const maxX = Math.max(minX + 10, width - GAME_CONFIG.wallMargin - 8 - platW);
+      const minX = GAME_CONFIG.wallMargin + 6;
+      const maxX = Math.max(minX + 10, width - GAME_CONFIG.wallMargin - 6 - platW);
       const platX = minX + Math.random() * (maxX - minX);
 
-      // 15층 이상부터 일정 확률로 좌우로 천천히 움직이는 가로 벽 등장
-      const isMoving = floorCount > 15 && Math.random() < 0.25;
-      const vx = isMoving ? (Math.random() < 0.5 ? 1 : -1) * (1.2 + Math.random() * 1.1) : 0;
+      // 10층 이상부터 움직이는 발판 추가
+      const isMoving = floorCount >= 10 && Math.random() < 0.3;
+      const vx = isMoving ? (Math.random() < 0.5 ? 1 : -1) * (1.3 + Math.random() * 1.2) : 0;
 
       platforms.push({
         x: platX,
@@ -1034,12 +949,12 @@
         floor: floorCount
       });
 
-      // 랜덤 코인 생성
+      // 코인 생성
       if (Math.random() < 0.45) {
         coins.push({
           x: platX + platW / 2,
-          y: highestPlatformY - 22,
-          radius: 10,
+          y: highestPlatformY - 20,
+          radius: 9,
           collected: false,
           bobOffset: Math.random() * Math.PI * 2
         });
@@ -1054,17 +969,18 @@
       floorCount = 0;
       shakeTime = 0;
       lastTime = performance.now();
+      healthTimeLeft = GAME_CONFIG.maxHealthTime;
+      lastJumpTime = 0;
 
       platforms = [];
       coins = [];
       particles = [];
 
-      // 시작 바닥(0층) 넓은 가로 발판 생성
-      const baseFloorY = height - 155;
+      const baseFloorY = height - 150;
       platforms.push({
-        x: GAME_CONFIG.wallMargin + 10,
+        x: GAME_CONFIG.wallMargin + 6,
         y: baseFloorY,
-        w: width - (GAME_CONFIG.wallMargin + 10) * 2,
+        w: width - (GAME_CONFIG.wallMargin + 6) * 2,
         h: 20,
         vx: 0,
         floor: 0
@@ -1080,7 +996,8 @@
       ball.trail = [];
 
       highestPlatformY = baseFloorY;
-      for (let i = 0; i < 14; i++) {
+      // 초반에 발판을 많이 생성
+      for (let i = 0; i < 18; i++) {
         generateNextFloor();
       }
 
@@ -1096,15 +1013,20 @@
       startBGM();
     }
 
-    // 왼쪽(빨강) / 오른쪽(파랑) 누르면 해당 방향으로 점프!
+    // 1초(1000ms)에 1번만 점프 뛸 수 있는 쿨타임 제한
     function jumpDirection(dir) {
       if (gameState !== 'PLAYING') return;
+      const now = performance.now();
+      if (now - lastJumpTime < 1000) return; // 1초 쿨타임
+
+      lastJumpTime = now;
       ensureAudio();
       ball.vx = dir * GAME_CONFIG.moveSpeed;
       ball.vy = GAME_CONFIG.jumpForce;
       ball.squashX = 0.74;
       ball.squashY = 1.28;
       playSound('jump');
+
       const particleColor = dir < 0 ? '#ff8787' : '#74c0fc';
       spawnParticles(ball.x, ball.y + GAME_CONFIG.ballRadius, particleColor, 6);
     }
@@ -1142,7 +1064,7 @@
     }
 
     // ==========================================
-    // 7. 프레임 업데이트 & 멈춤 방지 루프
+    // 7. 업데이트 및 체력(10초) 타이머 루프
     // ==========================================
     function update(dt) {
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -1156,9 +1078,22 @@
       if (shakeTime > 0) shakeTime--;
       if (gameState !== 'PLAYING') return;
 
+      // 10초 체력 감소 타이머
+      healthTimeLeft -= (dt / 60);
+      const healthPct = Math.max(0, (healthTimeLeft / GAME_CONFIG.maxHealthTime) * 100);
+      const healthFill = document.getElementById('health-bar-fill');
+      healthFill.style.width = healthPct + '%';
+      if (healthPct > 50) healthFill.style.background = '#51cf66';
+      else if (healthPct > 20) healthFill.style.background = '#fcc419';
+      else healthFill.style.background = '#ff6b6b';
+
+      if (healthTimeLeft <= 0) {
+        triggerGameOver();
+        return;
+      }
+
       const prevY = ball.y;
 
-      // 중력 및 공 이동 (공기 저항으로 수평 속도 자연 감속)
       ball.vy += GAME_CONFIG.gravity * dt;
       ball.x += ball.vx * dt;
       ball.y += ball.vy * dt;
@@ -1171,7 +1106,6 @@
       ball.trail.push({ x: ball.x, y: ball.y });
       if (ball.trail.length > 8) ball.trail.shift();
 
-      // 벽에 달라붙지 않고 부드럽게 반사
       const leftBound = GAME_CONFIG.wallMargin + GAME_CONFIG.ballRadius;
       const rightBound = width - GAME_CONFIG.wallMargin - GAME_CONFIG.ballRadius;
       if (ball.x < leftBound) {
@@ -1182,17 +1116,16 @@
         ball.vx = -Math.abs(ball.vx) * 0.65;
       }
 
-      // 가로 네모 벽(발판) 이동 및 착지 판정 (아래로 떨어질 때만 발판 밟고 튀어오름)
+      // 발판 충돌 및 코인 먹을 때마다 체력 3초 회복!
       for (let i = platforms.length - 1; i >= 0; i--) {
         const p = platforms[i];
         if (p.vx !== 0) {
           p.x += p.vx * dt;
-          if (p.x <= GAME_CONFIG.wallMargin + 6 || p.x + p.w >= width - GAME_CONFIG.wallMargin - 6) {
+          if (p.x <= GAME_CONFIG.wallMargin + 4 || p.x + p.w >= width - GAME_CONFIG.wallMargin - 4) {
             p.vx *= -1;
           }
         }
 
-        // 공이 위에서 아래로 떨어지면서 발판 윗면에 닿았을 때 자동 바운스
         if (ball.vy > 0) {
           const prevBottom = prevY + GAME_CONFIG.ballRadius;
           const currBottom = ball.y + GAME_CONFIG.ballRadius;
@@ -1203,7 +1136,7 @@
             ball.x - GAME_CONFIG.ballRadius * 0.7 <= p.x + p.w
           ) {
             ball.y = p.y - GAME_CONFIG.ballRadius;
-            ball.vy = GAME_CONFIG.jumpForce * 0.96;
+            ball.vy = GAME_CONFIG.jumpForce * 0.95;
             ball.squashX = 1.3;
             ball.squashY = 0.72;
             playSound('land');
@@ -1211,40 +1144,34 @@
           }
         }
 
-        // 화면 아래로 지나간 발판 즉시 메모리 해제 (멈춤 방지)
         if (p.y - cameraY > height + 120) {
           platforms.splice(i, 1);
         }
       }
 
-      // 카메라 상승 추적
       const targetCamY = ball.y - height * 0.45;
       if (targetCamY < cameraY) {
         cameraY = targetCamY;
       }
 
-      // 고도 점수 업데이트
-      const startY = height - 155;
+      const startY = height - 150;
       const currentAlt = Math.max(0, Math.floor((startY - ball.y) / 22));
       if (currentAlt > score) {
         score = currentAlt;
         document.getElementById('score-display').textContent = score;
       }
 
-      // 위쪽 새로운 층 계속 생성 (무한 루프 방지 안전장치 포함)
       let safetyGuard = 0;
       while (highestPlatformY > cameraY - 250 && safetyGuard < 15) {
         generateNextFloor();
         safetyGuard++;
       }
 
-      // 화면 아래로 추락 시 게임 오버
       if (ball.y - cameraY > height + 40) {
         triggerGameOver();
         return;
       }
 
-      // 코인 수집 판정
       for (let i = coins.length - 1; i >= 0; i--) {
         const c = coins[i];
         c.bobOffset += 0.08 * dt;
@@ -1255,6 +1182,8 @@
         if (!c.collected && Math.hypot(ball.x - c.x, ball.y - c.y) < GAME_CONFIG.ballRadius + c.radius + 6) {
           c.collected = true;
           saveData.coins += 1;
+          // 코인을 먹으면 체력 3초 즉시 회복!
+          healthTimeLeft = Math.min(GAME_CONFIG.maxHealthTime, healthTimeLeft + 3.0);
           persistSave();
           playSound('coin');
           spawnParticles(c.x, c.y, '#ffd43b', 8);
@@ -1276,7 +1205,6 @@
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 양쪽 타워 외벽 가이드 라인
       ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
       ctx.fillRect(0, 0, GAME_CONFIG.wallMargin, height);
       ctx.fillRect(width - GAME_CONFIG.wallMargin, 0, GAME_CONFIG.wallMargin, height);
@@ -1284,7 +1212,6 @@
       ctx.save();
       ctx.translate(0, -cameraY);
 
-      // 층별 네모난 가로 벽(발판) 그리기
       platforms.forEach(p => {
         ctx.fillStyle = theme.plat;
         ctx.strokeStyle = theme.platBorder;
@@ -1294,12 +1221,10 @@
         ctx.fill();
         ctx.stroke();
 
-        // 발판 상단 하이라이트
         ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
         ctx.fillRect(p.x + 4, p.y + 2, Math.max(0, p.w - 8), 3);
       });
 
-      // 코인 그리기
       coins.forEach(c => {
         const bobY = c.y + Math.sin(c.bobOffset) * 4;
         ctx.beginPath();
@@ -1311,7 +1236,6 @@
         ctx.stroke();
       });
 
-      // 플레이어 공 그리기
       if (gameState !== 'GAMEOVER') {
         const currentSkin = SKINS.find(s => s.id === saveData.equippedSkin) || SKINS[0];
         ball.trail.forEach((pos, idx) => {
@@ -1343,7 +1267,6 @@
         ctx.restore();
       }
 
-      // 파티클 그리기
       particles.forEach(p => {
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.fillStyle = p.color;
@@ -1358,7 +1281,6 @@
 
     function loop(timestamp) {
       if (!lastTime) lastTime = timestamp;
-      // 탭 전환이나 프레임 드랍 시 물리 폭주/멈춤 방지 (최대 2프레임 분량으로 제한)
       const dt = Math.min((timestamp - lastTime) / 16.667, 2.0);
       lastTime = timestamp;
 
@@ -1368,7 +1290,7 @@
     }
 
     // ==========================================
-    // 8. 버튼 및 키보드 이벤트 연결
+    // 8. 이벤트 및 버튼 리스너 연결
     // ==========================================
     const btnLeft = document.getElementById('btn-left');
     const btnRight = document.getElementById('btn-right');
@@ -1385,32 +1307,18 @@
       jumpDirection(1);
     });
 
-    window.addEventListener('keydown', e => {
-      if (gameState === 'PLAYING') {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
-          e.preventDefault();
-          btnLeft.classList.add('pressed');
-          jumpDirection(-1);
-        } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
-          e.preventDefault();
-          btnRight.classList.add('pressed');
-          jumpDirection(1);
-        }
-      } else if (e.code === 'Space' || e.code === 'Enter') {
-        if (!document.getElementById('start-screen').classList.contains('hidden')) startGame();
-        else if (!document.getElementById('gameover-screen').classList.contains('hidden')) startGame();
-      }
+    document.getElementById('start-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
     });
 
-    window.addEventListener('keyup', e => {
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') btnLeft.classList.remove('pressed');
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') btnRight.classList.remove('pressed');
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      playSound('click');
+      startGame();
     });
-
-    document.getElementById('start-btn').addEventListener('click', startGame);
-    document.getElementById('restart-btn').addEventListener('click', startGame);
 
     document.getElementById('home-btn').addEventListener('click', () => {
+      playSound('click');
       gameState = 'MENU';
       stopBGM();
       document.getElementById('gameover-screen').classList.add('hidden');
@@ -1419,14 +1327,17 @@
     });
 
     document.getElementById('open-shop-btn').addEventListener('click', () => {
+      playSound('click');
       renderShop();
       document.getElementById('shop-screen').classList.remove('hidden');
     });
     document.getElementById('shop-back-btn').addEventListener('click', () => {
+      playSound('click');
       document.getElementById('shop-screen').classList.add('hidden');
     });
 
     function openRankingModal() {
+      playSound('click');
       document.getElementById('ranking-screen').classList.remove('hidden');
       syncAndLoadLeaderboard(true);
     }
@@ -1434,10 +1345,12 @@
     document.getElementById('open-ranking-btn').addEventListener('click', openRankingModal);
     document.getElementById('lobby-ranking-btn').addEventListener('click', openRankingModal);
     document.getElementById('ranking-back-btn').addEventListener('click', () => {
+      playSound('click');
       document.getElementById('ranking-screen').classList.add('hidden');
     });
 
     document.getElementById('nickname-change-btn').addEventListener('click', () => {
+      playSound('click');
       const newName = prompt('랭킹에 표시할 닉네임을 입력하세요 (최대 10자):', saveData.nickname);
       if (newName && newName.trim()) {
         saveData.nickname = newName.trim().substring(0, 10);
@@ -1463,7 +1376,7 @@
       playSound('coin');
     });
 
-    // 게임 접속 시 즉시 로비 UI 갱신 및 실시간 랭킹 자동 등록
+    // 접속 시 즉시 로비 갱신 및 실시간 공용 랭킹 동기화
     updateLobbyDisplay();
     syncAndLoadLeaderboard(true);
     requestAnimationFrame(loop);
